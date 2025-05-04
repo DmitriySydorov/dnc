@@ -173,6 +173,7 @@
         "sale_price": "Sale price",
         "unit_price": "Unit price"
       },
+      "buy_now": "Buy Now",
       "share": "Share this product",
       "sold_out": "Sold out",
       "unavailable": "Unavailable",
@@ -397,7 +398,13 @@
       "title": "Account",
       "details": "Account details",
       "view_addresses": "View addresses",
-      "return": "Return to Account details"
+      "return": "Return to Account details",
+      "gender": "Gender",
+      "date_bd": "Date of Birth",
+      "female": "Female",
+      "male": "Male",
+      "select": "Select",
+      "user_code": "User Code"
     },
     "account_fallback": "Account",
     "activate_account": {

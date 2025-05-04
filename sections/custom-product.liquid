@@ -1,0 +1,211 @@
+{{ 'custom-product.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+{% assign current_variant_id = request.params.variant | default: product.selected_or_first_available_variant.id %}
+{% assign selected_variant = product.variants | where: 'id', current_variant_id | first %}
+{% assign all_variants = product.variants %}
+<div id="shopify-section-{{ section.id }}" class="section-{{ section.id }}-padding">
+  <div id="product-info-wrapper" data-section-id="{{ section.id }}">
+    <div id="product-gallery">
+      {% for image in product.images %}
+        <img
+          src="{{ image | image_url: width: 800 }}"
+          alt="{{ image.alt | escape }}"
+          width="800px"
+          height="auto"
+          style="display: block; width: 100%; margin-bottom: 10px;"
+        >
+      {% endfor %}
+    </div>
+    <div
+      id="product-info"
+      data-variants="{{ all_variants | json | replace: "'", "&apos;" | replace: '"', "&quot;" }}"
+    >
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'title' %}
+            <h1>{{ product.title }}</h1>
+          {% when 'description' %}
+            <p>{{ product.description }}</p>
+          {% when 'price' %}
+            <div class="price-block">
+              <span class="custom-price {% if selected_variant.compare_at_price > selected_variant.price %}sale-price{% endif %}">
+                {{- selected_variant.price | money -}}
+              </span>
+              {% if selected_variant.compare_at_price > selected_variant.price %}
+                <span class="badge-sale-price">{{ selected_variant.compare_at_price | money }}</span>
+                <span class="custom-badge sale">{{ 'products.product.on_sale' | t }}</span>
+              {% endif %}
+              {% unless selected_variant.available %}
+                <span class="custom-badge soldout">{{ 'products.product.sold_out' | t }}</span>
+              {% endunless %}
+            </div>
+          {% when 'variant_picker' %}
+            <form id="variant-form">
+              {% for option in product.options_with_values %}
+                <div class="option-group" data-option-index="{{ forloop.index0 }}">
+                  <strong>{{ option.name }}:</strong>
+                  {% for value in option.values %}
+                    <label
+                      {% if option.name == 'Type' or option.name == 'Date' %}
+                        style="opacity:1!important;text-decoration:none!important;"
+                      {% endif %}
+                    >
+                      <input
+                        type="radio"
+                        name="option-{{ forloop.parentloop.index0 }}"
+                        value="{{ value }}"
+                        {% if selected_variant.options[forloop.parentloop.index0] == value %}
+                          checked
+                        {% endif %}
+                      >
+                      {{ value }}
+                    </label>
+                  {% endfor %}
+                </div>
+              {% endfor %}
+            </form>
+          {% when 'quantity_selector' %}
+            <strong style="margin-top: 16px;display:block;">
+              {{ 'products.product.quantity.label' | t }}:
+            </strong>
+            <div id="quantity-wrapper">
+              <button type="button" id="decrease-qty">−</button>
+              <input type="number" id="quantity" name="quantity" value="1" min="1">
+              <button type="button" id="increase-qty">+</button>
+            </div>
+          {% when 'add_to_cart' %}
+            <div id="add-to-cart-message" style="margin-top: 10px; color: green; display: none;"></div>
+            <button type="button" id="add-to-cart" disabled>{{ 'products.product.sold_out' | t }}</button>
+            <button type="button" id="go-to-checkout">{{ 'products.product.buy_now' | t }}</button>
+          {% when 'user_form' %}
+            <div id="user-form">
+              <div>
+                <label
+                  ><strong>{{ 'customer.addresses.first_name' | t }}*:</strong>
+                  <input type="text" name="properties[First Name]" required>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.addresses.last_name' | t }}*:</strong>
+                  <input type="text" name="properties[Last Name]" required>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.login_page.email' | t }}*:</strong>
+                  <input type="email" name="properties[Email Address]" required>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.addresses.phone' | t }}*:</strong>
+                  <input type="tel" name="properties[Phone Number]" required>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.addresses.zip' | t }}*:</strong>
+                  <input type="text" name="properties[Postal Code]" required>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.account.date_bd' | t }}*:</strong>
+                  <input type="date" name="properties[Date of Birth]" required>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.account.gender' | t }}*:</strong>
+                  <select name="properties[Gender]" required>
+                    <option value="">{{ 'customer.account.select' | t }}</option>
+                    <option value="female">{{ 'customer.account.female' | t }}</option>
+                    <option value="male">{{ 'customer.account.male' | t }}</option>
+                  </select>
+                </label>
+              </div>
+              <div>
+                <label
+                  ><strong>{{ 'customer.account.user_code' | t }}:</strong>
+                  <input type="text" name="properties[User Code]">
+                </label>
+              </div>
+            </div>
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<script src="{{ 'custom-product.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Custom product",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    { "type": "title", "name": "Product Title" },
+    { "type": "description", "name": "Product Description" },
+    { "type": "price", "name": "Product Price" },
+    { "type": "variant_picker", "name": "Variant Picker" },
+    { "type": "quantity_selector", "name": "Quantity Selector" },
+    { "type": "add_to_cart", "name": "Add to Cart Button" },
+    { "type": "user_form", "name": "User Form" }
+  ],
+  "presets": [
+    {
+      "name": "Custom product",
+      "blocks": [
+        { "type": "title" },
+        { "type": "description" },
+        { "type": "price" },
+        { "type": "variant_picker" },
+        { "type": "quantity_selector" },
+        { "type": "add_to_cart" },
+        { "type": "user_form" }
+      ]
+    }
+  ]
+}
+{% endschema %}

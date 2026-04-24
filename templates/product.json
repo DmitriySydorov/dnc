@@ -38,6 +38,12 @@
           "type": "quantity_selector",
           "settings": {}
         },
+        "custom_liquid_Kzdp8F": {
+          "type": "custom_liquid",
+          "settings": {
+            "custom_liquid": "<button data-product=\"try-on\" data-image=\"https://example.com/product/image.jpg\"\n        data-id=\"1\" data-name=\"Example Product\"\n        data-url=\"https://example.com/product\"\n        data-details=\"Product Details\"\n        data-instructions=\"Product Instructions\">\n    Virtual Try-On Product\n</button>\n<script>\n    (function (w, d, s, url) {\n        const js = d.createElement(s);\n        js.async = true;\n        js.onload = function () {\n            document.dispatchEvent(new CustomEvent('PrimirAiWidgetLoaded'));\n        };\n        js.src = url;\n        d.getElementsByTagName('body')[0].appendChild(js);\n    })(window, document, 'script', 'https://dev.primir.ai/widget/1.1.12/primir-ai.js');\n</script>\n\n<script>\n    document.addEventListener('PrimirAiWidgetLoaded', function () {\n        const widget = new window.PrimirAiWidget({\n            clientId: 'your-client-id'\n        });\n    });\n\ndocument.querySelectorAll('[data-product=\"try-on\"]').forEach(btn => {\n        btn.addEventListener('click', () => {\n            widget.openProduct({\n                image: btn.dataset.image,\n                id: btn.dataset.id,\n                name: btn.dataset.name,\n                url: btn.dataset.url,\n                details: btn.dataset.details,\n                instructions: btn.dataset.instructions,\n            });\n        });\n    });\n</script>"
+          }
+        },
         "buy_buttons": {
           "type": "buy_buttons",
           "settings": {
@@ -62,6 +68,7 @@
         "price",
         "variant_picker",
         "quantity_selector",
+        "custom_liquid_Kzdp8F",
         "buy_buttons",
         "description",
         "share"
